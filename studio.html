@@ -1,0 +1,203 @@
+<title>AROL Studio Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400;500&display=swap">
+<style>
+/* Layout: a ledger of pieces on the left, the open piece's sheet on the right; one column on a phone. */
+:root {
+  --void: #0b0a09; --panel: #141211; --line: #2a2522; --bone: #e8dfd8; --ash: #9a8f88;
+  --blood: #b41e25; --ember: #d9705f; --ok: #7fae86; --warn: #d9a45f;
+  --display: "Bodoni Moda", "Didot", Georgia, serif;
+  --body: "Jost", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--void); color: var(--bone); font-family: var(--body); font-weight: 300; font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+h1, h2 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 1px solid var(--ember); outline-offset: 2px; }
+
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid var(--line); max-width: 1240px; margin: 0 auto; }
+.top h1 { font-size: clamp(26px, 4vw, 38px); letter-spacing: .01em; }
+.top p { margin: 4px 0 0; color: var(--ash); font-size: 13px; }
+.pub { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pill { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--line); color: var(--ash); }
+.pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.btn { background: var(--blood); border: 1px solid var(--blood); padding: 10px 18px; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; font-weight: 500; cursor: pointer; }
+.btn[disabled] { opacity: .4; cursor: default; }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--bone); }
+
+.wrap { display: grid; grid-template-columns: minmax(240px, 330px) minmax(0, 1fr); gap: 24px; max-width: 1240px; margin: 20px auto 0; }
+@media (max-width: 760px) { .wrap { grid-template-columns: 1fr; } }
+
+.ledger { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.search { width: 100%; background: var(--panel); border: 1px solid var(--line); padding: 9px 12px; }
+.list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); max-height: 70vh; overflow-y: auto; }
+@media (max-width: 760px) { .list { max-height: 36vh; } }
+.list li button { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 10px 6px; cursor: pointer; }
+.list li button:hover { background: var(--panel); }
+.list li button[aria-current="true"] { background: var(--panel); box-shadow: inset 2px 0 0 var(--blood); }
+.list .nm { font-family: var(--display); font-size: 17px; }
+.list .pr { font-variant-numeric: tabular-nums; }
+.list .meta { grid-column: 1 / -1; color: var(--ash); font-size: 12px; display: flex; gap: 8px; align-items: center; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); display: inline-block; }
+
+.sheet { background: var(--panel); border: 1px solid var(--line); padding: 22px clamp(16px, 3vw, 30px) 26px; min-width: 0; }
+.sheet h2 { font-size: 30px; }
+.sheet .sub { color: var(--ash); font-size: 13px; margin: 2px 0 18px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px 18px; }
+fieldset { border: 0; border-top: 1px solid var(--line); margin: 20px 0 0; padding: 16px 0 0; display: grid; gap: 14px; }
+legend { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ember); padding: 0 8px 0 0; }
+label { display: grid; gap: 5px; font-size: 12px; color: var(--ash); letter-spacing: .04em; }
+label input, label textarea { background: var(--void); border: 1px solid var(--line); padding: 9px 11px; font-size: 15px; color: var(--bone); width: 100%; }
+label textarea { resize: vertical; min-height: 90px; line-height: 1.55; }
+.hint { font-size: 12px; color: var(--ash); }
+.count { font-variant-numeric: tabular-nums; }
+.count.over { color: var(--ember); }
+.preview { background: var(--void); border: 1px solid var(--line); padding: 12px 14px; font-family: Arial, sans-serif; }
+.preview .t { color: #8ab4f8; font-size: 18px; line-height: 1.3; }
+.preview .u { color: #9aa0a6; font-size: 12px; }
+.preview .d { color: #bdc1c6; font-size: 13px; margin-top: 3px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 22px; }
+.note { color: var(--ash); font-size: 13px; }
+.empty { color: var(--ash); padding: 30px 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--bone); color: var(--void); padding: 10px 16px; font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { .list li button { transition: background .15s; } }
+</style>
+
+<header class="top">
+  <div>
+    <h1>Studio Desk</h1>
+    <p>Prices, words and search listings for arockonalens.com. Private to you.</p>
+  </div>
+  <div class="pub">
+    <span class="pill" id="pubState">Loading…</span>
+    <button class="btn" id="publishBtn" type="button" disabled>Publish to the website</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="ledger" aria-label="Pieces">
+    <input class="search" id="search" type="search" placeholder="Find a piece" aria-label="Find a piece">
+    <ul class="list" id="list"><li class="empty">Opening the ledger…</li></ul>
+  </section>
+  <section class="sheet" id="sheet" aria-live="polite">
+    <p class="empty">Choose a piece on the left to edit it.</p>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var pieces = [], open = null, req = null, db = null, canWrite = false;
+
+  function toast(t) { var el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 2600); }
+  function money(n) { return 'A$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function renderList() {
+    var q = $('search').value.trim().toLowerCase();
+    var shown = pieces.filter(function (p) { return !q || (p.name || '').toLowerCase().indexOf(q) > -1; });
+    if (!pieces.length) { $('list').innerHTML = '<li class="empty">No pieces yet. Claude loads them from the website.</li>'; return; }
+    if (!shown.length) { $('list').innerHTML = '<li class="empty">No piece matches “' + esc(q) + '”.</li>'; return; }
+    $('list').innerHTML = shown.map(function (p) {
+      return '<li><button type="button" data-id="' + esc(p.id) + '" aria-current="' + (open === p.id) + '">' +
+        '<span class="nm">' + esc(p.name) + '</span><span class="pr">' + money(p.price) + '</span>' +
+        '<span class="meta">' + esc(p.kind || '') + (p.dirty ? ' <span class="dot" aria-hidden="true"></span> Changed, not published' : '') + '</span></button></li>';
+    }).join('');
+  }
+
+  function counter(el, max, out) {
+    function f() { var n = el.value.length; out.textContent = n + ' / ' + max; out.classList.toggle('over', n > max); }
+    el.addEventListener('input', f); f();
+  }
+
+  function renderSheet() {
+    var p = pieces.filter(function (x) { return x.id === open; })[0];
+    if (!p) { $('sheet').innerHTML = '<p class="empty">Choose a piece on the left to edit it.</p>'; return; }
+    var ro = canWrite ? '' : ' disabled';
+    $('sheet').innerHTML =
+      '<h2>' + esc(p.name) + '</h2><p class="sub">' + esc(p.kind) + ' · one of one' +
+      (p.etsyPrice != null ? ' · Etsy price ' + money(p.etsyPrice) : '') + '</p>' +
+      '<form id="f" novalidate>' +
+      '<div class="grid2">' +
+        '<label for="f-price">Price on the website (AUD)<input id="f-price" name="price" inputmode="decimal" value="' + esc(p.price) + '"' + ro + '></label>' +
+        '<label for="f-track">Line under the name<input id="f-track" name="track" value="' + esc(p.track) + '"' + ro + '></label>' +
+      '</div>' +
+      '<fieldset><legend>The piece</legend>' +
+        '<label for="f-story">Description <span class="hint">Leave a blank line between paragraphs.</span><textarea id="f-story" name="story" rows="8"' + ro + '>' + esc(p.story) + '</textarea></label>' +
+        '<label for="f-details">The details <span class="hint">One per line.</span><textarea id="f-details" name="details" rows="5"' + ro + '>' + esc(p.details) + '</textarea></label>' +
+      '</fieldset>' +
+      '<fieldset><legend>Search listing</legend>' +
+        '<label for="f-seot">Page title <span class="count" id="c-seot"></span><input id="f-seot" name="seoTitle" value="' + esc(p.seoTitle) + '"' + ro + '></label>' +
+        '<label for="f-seod">Search description <span class="count" id="c-seod"></span><textarea id="f-seod" name="seoDescription" rows="3"' + ro + '>' + esc(p.seoDescription) + '</textarea></label>' +
+        '<div class="preview" aria-label="How it may look in Google"><div class="u">arockonalens.com › ' + esc(p.id) + '</div><div class="t" id="pv-t"></div><div class="d" id="pv-d"></div></div>' +
+      '</fieldset>' +
+      '<div class="actions"><button class="btn" type="submit"' + ro + '>Save changes</button>' +
+        '<button class="btn ghost" type="button" id="revert"' + ro + '>Undo unsaved edits</button>' +
+        '<span class="note" id="saved">' + (p.dirty ? 'Saved here. Waiting to be published.' : 'Matches the website.') + '</span></div>' +
+      '</form>';
+    var t = $('f-seot'), d = $('f-seod');
+    counter(t, 60, $('c-seot')); counter(d, 155, $('c-seod'));
+    function pv() { $('pv-t').textContent = t.value || p.name; $('pv-d').textContent = d.value; }
+    t.addEventListener('input', pv); d.addEventListener('input', pv); pv();
+    $('revert').addEventListener('click', renderSheet);
+    $('f').addEventListener('submit', function (e) { e.preventDefault(); save(p); });
+  }
+
+  function save(p) {
+    if (!db || !canWrite) return;
+    var f = $('f'), price = parseFloat(String(f.price.value).replace(/[^0-9.]/g, ''));
+    if (!(price > 0) || price > 100000) { $('saved').textContent = 'Enter the price as a number, like 299.'; f.price.focus(); return; }
+    var patch = { price: Math.round(price * 100) / 100, track: f.track.value.trim(), story: f.story.value.trim(),
+      details: f.details.value.trim(), seoTitle: f.seoTitle.value.trim(), seoDescription: f.seoDescription.value.trim(),
+      dirty: true, editedAt: Date.now() };
+    $('saved').textContent = 'Saving…';
+    db.doc('products/' + p.id).update(patch).then(function () { toast(p.name + ' saved'); })
+      .catch(function (err) { $('saved').textContent = 'Not saved: ' + (err && err.message || 'try again') + '.'; });
+  }
+
+  function renderPub() {
+    var dirty = pieces.filter(function (p) { return p.dirty; }).length;
+    var st = $('pubState'), b = $('publishBtn');
+    st.className = 'pill';
+    if (req && req.status === 'pending') { st.textContent = 'Publish requested'; st.classList.add('warn'); }
+    else if (dirty) { st.textContent = dirty + (dirty === 1 ? ' piece' : ' pieces') + ' to publish'; st.classList.add('warn'); }
+    else { st.textContent = req && req.publishedAt ? 'Live · ' + new Date(req.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : 'Website up to date'; st.classList.add('ok'); }
+    b.disabled = !canWrite || !dirty || (req && req.status === 'pending');
+  }
+
+  $('search').addEventListener('input', renderList);
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-id]'); if (!b) return;
+    open = b.getAttribute('data-id'); renderList(); renderSheet();
+  });
+  $('publishBtn').addEventListener('click', function () {
+    if (!db) return;
+    var n = pieces.filter(function (p) { return p.dirty; }).length;
+    db.doc('publish/request').set({ status: 'pending', requestedAt: Date.now(), pieces: n,
+      publishedAt: req && req.publishedAt || null })
+      .then(function () { toast('Sent. In Claude Code, say “publish the studio desk”.'); })
+      .catch(function (err) { toast('Not sent: ' + (err && err.message || 'try again')); });
+  });
+
+  if (!window.claude || !window.claude.use) { $('list').innerHTML = '<li class="empty">Open this page on claude.ai to edit.</li>'; return; }
+  Promise.all([window.claude.use('db'), window.claude.use('user')]).then(function (r) {
+    db = r[0]; var user = r[1];
+    if (!db) { $('list').innerHTML = '<li class="empty">Sign in to claude.ai to edit your pieces.</li>'; $('pubState').textContent = 'Signed out'; return; }
+    if (user) user.canEdit().then(function (v) { canWrite = !!v; renderPub(); if (open) renderSheet(); }).catch(function () {});
+    var timer = setTimeout(function () { if (!pieces.length) $('list').innerHTML = '<li class="empty">The ledger is taking a while. Check your connection.</li>'; }, 10000);
+    db.collection('products').orderBy('name').onSnapshot(function (snap) {
+      clearTimeout(timer);
+      pieces = snap.docs.map(function (d) { return Object.assign({}, d.data(), { id: d.id }); });
+      renderList(); renderPub();
+      var active = document.activeElement && document.activeElement.closest && document.activeElement.closest('#f');
+      if (open && !active) renderSheet();
+    }, function () { clearTimeout(timer); $('list').innerHTML = '<li class="empty">Could not open the ledger.</li>'; });
+    db.doc('publish/request').onSnapshot(function (d) { req = d.exists ? d.data() : null; renderPub(); }, function () {});
+  });
+})();
+</script>
